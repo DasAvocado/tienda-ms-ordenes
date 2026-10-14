@@ -1,0 +1,9 @@
+services:
+  ms-ordenes:
+    build: .
+    image: pedidos360/ms-ordenes
+    container_name: ms-ordenes
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    env_file: .env      # copia .env.example a .env y completa los valores
