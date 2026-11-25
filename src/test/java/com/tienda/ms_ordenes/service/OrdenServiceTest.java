@@ -37,4 +37,20 @@ class OrdenServiceTest {
         assertEquals("a@b.cl", evento.getValue().email());
         assertEquals(2, evento.getValue().items().size());
     }
+
+    @Test
+    void usaTotalPagadoConDescuentoYEnvio() {
+        OrdenRepository repo = mock(OrdenRepository.class);
+        OrdenPublisher publisher = mock(OrdenPublisher.class);
+        when(repo.save(any(Orden.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        List<CheckoutEvent.Item> items = List.of(new CheckoutEvent.Item(1L, "Filtro", 15000, 2));
+        Orden orden = new OrdenService(repo, publisher).crearDesdeCheckout(new CheckoutEvent("u1", "a@b.cl", "Ana", items,
+                99L, "WEBPAY", 30000, 3000, 3990, 30990, "BIENVENIDA10", "ESTANDAR"));
+
+        assertEquals(30990.0, orden.getTotal(), 0.001);
+        assertEquals(30000.0, orden.getSubtotal(), 0.001);
+        assertEquals("PAGADA", orden.getEstado());
+        assertEquals(99L, orden.getPagoId());
+    }
 }

@@ -27,6 +27,16 @@ spring:
         prefetch: 10
 
 app:
+  # ---- Apache Kafka: eventos de analitica (navegacion, pagos, fraude, transacciones) ----
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092,localhost:9094,localhost:9096}
+    replicas: ${KAFKA_REPLICAS:3}             # factor de replicacion (1 si usas un solo broker en local)
+    topicos:
+      transacciones:                     # checkout, orden creada, correo enviado (antes en RabbitMQ auditoria.todos)
+        nombre: pedidos360.transacciones
+        particiones: 3
+        retencion-ms: 2592000000         # 30 dias
+        min-isr: 2
   # ---- RabbitMQ: TODOS los nombres de mensajeria de este servicio se definen aqui ----
   rabbit:
     exchange: pedidos360.events          # exchange topic compartido por todos los servicios

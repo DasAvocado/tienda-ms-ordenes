@@ -38,12 +38,22 @@ public class OrdenService {
         orden.setEstado("CREADA");
         orden.setFecha(Instant.now());
 
-        double total = 0;
+        double subtotal = 0;
         for (CheckoutEvent.Item i : evento.items()) {
             orden.getItems().add(new OrdenItem(i.productoId(), i.nombre(), i.precio(), i.cantidad()));
-            total += i.precio() * i.cantidad();
+            subtotal += i.precio() * i.cantidad();
         }
+        // El total viene calculado por ms-carrito (descuento + envio) y ya fue pagado en ms-pagos.
+        double total = evento.total() > 0 ? evento.total() : subtotal;
+        orden.setSubtotal(subtotal);
+        orden.setDescuento(evento.descuento());
+        orden.setCostoEnvio(evento.costoEnvio());
         orden.setTotal(total);
+        orden.setPagoId(evento.pagoId());
+        orden.setMetodoPago(evento.metodoPago());
+        orden.setCupon(evento.cupon());
+        orden.setTipoEnvio(evento.tipoEnvio());
+        if (evento.pagoId() != null) orden.setEstado("PAGADA");
         orden = ordenes.save(orden);
         log.info("Orden {} creada para {} (total {})", orden.getId(), evento.email(), total);
 
